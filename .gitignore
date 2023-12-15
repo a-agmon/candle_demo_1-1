@@ -1,0 +1,5 @@
+# Ignore all 'target' directories
+target/
+
+# Ignore files with .bin extension
+*.bin
