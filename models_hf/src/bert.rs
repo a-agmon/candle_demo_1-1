@@ -53,8 +53,7 @@ impl BertInferenceModel {
         let config = std::fs::read_to_string(config_filename)?;
         let config: Config = serde_json::from_str(&config)?;
         // load the tokenizer
-        let tokenizer = Tokenizer::from_file(tokenizer_filename)
-        .map_err(anyhow::Error::msg)?;
+        let tokenizer = Tokenizer::from_file(tokenizer_filename).map_err(anyhow::Error::msg)?;
         // load the model
         let vb =
             unsafe { VarBuilder::from_mmaped_safetensors(&[weights_filename], DTYPE, &device)? };
@@ -93,8 +92,7 @@ impl BertInferenceModel {
         let token_ids = tokens
             .iter()
             .map(|tokens| {
-                let tokens = tokens.get_ids().to_vec();
-                Ok(Tensor::new(tokens.as_slice(), &self.device)?)
+                Ok(Tensor::new(tokens.get_ids(), &self.device)?)
             })
             .collect::<anyhow::Result<Vec<_>>>()?;
         let token_ids = Tensor::stack(&token_ids, 0)?;

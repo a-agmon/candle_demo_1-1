@@ -1,11 +1,11 @@
 use axum::extract::State;
 use axum::routing::post;
 use axum::{Json, Router};
+use models_hf::bert::BertInferenceModel;
 use serde::{Deserialize, Serialize};
 use std::fs::File;
 use std::sync::Arc;
 use tokio::net::TcpListener;
-use models_hf::bert::BertInferenceModel;
 #[derive(Deserialize)]
 struct ReqPayload {
     text: String,
@@ -27,11 +27,9 @@ async fn main() -> anyhow::Result<()> {
         embedding_key,
     )?;
 
-    let mut text_map_file = File::open("text_map.bin").unwrap();
-    let text_map: Vec<String> = bincode::decode_from_std_read(
-        &mut text_map_file,
-        bincode::config::standard(),
-    )?;
+    let mut text_map_file = File::open("keys.bin").unwrap();
+    let text_map: Vec<String> =
+        bincode::decode_from_std_read(&mut text_map_file, bincode::config::standard())?;
     let shared_state = Arc::new((bert_model, text_map));
 
     let app = Router::new()
@@ -54,24 +52,16 @@ async fn find_similar(
         .infer_sentence_embedding(&payload.text)
         .expect("error infering sentence embedding");
     let results: Vec<(usize, f32)> = model
-        .score_vector_similarity(
-            query_vector,
-            payload.num_results as usize,
-        )
+        .score_vector_similarity(query_vector, payload.num_results as usize)
         .unwrap();
 
     let results: Vec<String> = results
         .into_iter()
         .map(|r| {
             let top_item_text = text_map.get(r.0).unwrap();
-            format!(
-                "Item:{} (index: {} score:{:?})",
-                top_item_text, r.0, r.1
-            )
+            format!("Item:{} (index: {} score:{:?})", top_item_text, r.0, r.1)
         })
         .collect();
 
     Json(ResPayload { text: results })
 }
-
-

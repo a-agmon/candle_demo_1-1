@@ -7,7 +7,6 @@ extern crate accelerate_src;
 use candle::Tensor;
 use models_hf::bert::BertInferenceModel;
 use rayon::prelude::*;
-use std::collections::HashMap;
 
 fn main() {
     // extract the file name from the command line arg
@@ -19,16 +18,13 @@ fn main() {
     let file_name = &args[1];
     println!("Starting to generate embeddings from {}", file_name);
     //let file_name = "/Users/alonagmon/MyData/work/bbc_news.csv";
-    let text_map: HashMap<String, String> = get_textcsv_as_map(file_name, 0, 0).unwrap();
-    println!("text_map loaded - size: {}", text_map.len());
+    let assets = get_textcsv_as_map(file_name, 0, 1);
+    let (names, texts) = assets.unwrap();
+    println!("text_map loaded - size: {}", names.len());
 
-    // tale all the values to a vec string
-    let sentences: Vec<String> = text_map.values().map(|s| s.to_string()).collect();
-    // serialize the map to a binary file
-    let mut file = std::fs::File::create("text_map.bin").unwrap();
-    bincode::encode_into_std_write(&sentences, &mut file, bincode::config::standard())
-        .expect("failed to encode sentences");
-    println!("text_map serialized to text_map.bin");
+    ser_string_vec_file("texts.bin", &texts).unwrap();
+    ser_string_vec_file("keys.bin", &names).unwrap();
+    println!("mapping files serialized to disk");
 
     let bert_model = BertInferenceModel::load(
         "sentence-transformers/all-MiniLM-L6-v2",
@@ -40,8 +36,8 @@ fn main() {
     println!("bert model loaded");
 
     // try to do this in parallel using rayon
-    let results: Vec<Result<Tensor, _>> = sentences
-        .par_chunks(350)
+    let results: Vec<Result<Tensor, _>> = texts
+        .par_chunks(500)
         .map(|chunk| bert_model.create_embeddings(chunk.to_vec()))
         .collect();
     println!("results generated");
@@ -64,14 +60,22 @@ fn get_textcsv_as_map(
     filename: &str,
     name_col_index: usize,
     text_col_index: usize,
-) -> anyhow::Result<HashMap<String, String>> {
-    let mut map = HashMap::new();
+) -> anyhow::Result<(Vec<String>, Vec<String>)> {
+    let mut text_vec: Vec<String> = Vec::new();
+    let mut name_vec: Vec<String> = Vec::new();
     let mut rdr = csv::Reader::from_path(filename)?;
     for result in rdr.records() {
         let record = result?;
         let name = record.get(name_col_index).unwrap().to_string();
         let text = record.get(text_col_index).unwrap().to_string();
-        map.insert(name, text);
+        text_vec.push(text);
+        name_vec.push(name);
     }
-    Ok(map)
+    Ok((name_vec, text_vec))
+}
+
+fn ser_string_vec_file(filename: &str, vec: &Vec<String>) -> anyhow::Result<()> {
+    let mut file = std::fs::File::create(filename)?;
+    bincode::encode_into_std_write(vec, &mut file, bincode::config::standard())?;
+    Ok(())
 }
