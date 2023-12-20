@@ -18,6 +18,7 @@ struct ResPayload {
 }
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+
     let filename = "embeddings.bin";
     let embedding_key = "my_embedding";
     let bert_model = BertInferenceModel::load(

@@ -2267,7 +2267,9 @@ name = "testing_app"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "bincode",
  "csv",
+ "models_hf",
 ]
 
 [[package]]
