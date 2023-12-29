@@ -1,5 +1,6 @@
 pub mod bert;
 pub mod quant_phi;
+pub mod open_chat;
 
 pub fn add(left: usize, right: usize) -> usize {
     left + right

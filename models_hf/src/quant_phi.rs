@@ -51,7 +51,8 @@ impl TextGeneration {
         }
     }
 
-    fn run(&mut self, prompt: &str, sample_len: usize) -> Result<()> {
+    fn run(&mut self, prompt: &str, sample_len: usize) -> Result<String> {
+        let mut generated_buffer: Vec<String> = Vec::new();
         use std::io::Write;
         println!("starting the inference loop");
         let tokens = self.tokenizer.encode(prompt, true).map_err(E::msg)?;
@@ -70,7 +71,8 @@ impl TextGeneration {
             Some(token) => *token,
             None => anyhow::bail!("cannot find the endoftext token"),
         };
-        print!("{prompt}");
+        // we dont print the prompt
+        //print!("{prompt}");
         std::io::stdout().flush()?;
         let start_gen = std::time::Instant::now();
         for index in 0..sample_len {
@@ -97,7 +99,9 @@ impl TextGeneration {
                 break;
             }
             let token = self.tokenizer.decode(&[next_token], true).map_err(E::msg)?;
-            print!("{token}");
+            print!("{token}"); // this is the created token
+                               // add this to the buffer
+            generated_buffer.push(token);
             std::io::stdout().flush()?;
         }
         let dt = start_gen.elapsed();
@@ -105,12 +109,14 @@ impl TextGeneration {
             "\n{generated_tokens} tokens generated ({:.2} token/s)",
             generated_tokens as f64 / dt.as_secs_f64(),
         );
-        Ok(())
+        // turn the buffer into a string
+        let generated_text = generated_buffer.join("");
+        Ok(generated_text)
     }
 }
 
 pub struct QuantPhiTextGenerator {
-    text_generator:TextGeneration,
+    text_generator: TextGeneration,
 }
 
 impl QuantPhiTextGenerator {
@@ -142,12 +148,19 @@ impl QuantPhiTextGenerator {
         );
         //let prompt = "USER: given the following context in square brackets, please answer the question: what is special about today? \n[today is the first day of the year and my birthday]\nnASSISTANT: ";
         //pipeline.run(prompt, 100)?;
-        Ok(Self {text_generator: pipeline})
+        Ok(Self {
+            text_generator: pipeline,
+        })
     }
 
     pub fn run_test(&mut self, prompt: &str, sample_len: usize) -> Result<()> {
         //let prompt = "USER: given the following context in square brackets, please answer the question: what is special about today? \n[today is the first day of the year and my birthday]\nnASSISTANT: ";
         self.text_generator.run(prompt, sample_len)?;
         Ok(())
+    }
+    pub fn generate_text(&mut self, prompt: &str, sample_len: usize) -> Result<String> {
+        //let prompt = "USER: given the following context in square brackets, please answer the question: what is special about today? \n[today is the first day of the year and my birthday]\nnASSISTANT: ";
+        let generated_text = self.text_generator.run(prompt, sample_len)?;
+        Ok(generated_text)
     }
 }

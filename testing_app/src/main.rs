@@ -33,13 +33,36 @@ fn main() -> anyhow::Result<()> {
 
     let prompt_rag = format!(
         r#"
-        USER: I have an abstract of a scientific article.
+        USER: Given the following  abstract of a scientific article:
         abstract 1: {}
-        Can you explain in a sentence or two what is this abstract about?
+        Can you suggest keywords that describe the topic of this article?
         ASSISTANT:"#,
         results[1]
     );
-    gen_model.run_test(&prompt_rag, 250)?;
+    let prompt_rag2 = format!(
+        r#"
+        USER:Given the following  abstract of a scientific article:
+        abstract 1: {}
+        Can you explain, in a sentence or two, what is this article about?
+        ASSISTANT:"#,
+        results[1]
+    );
+    let prompt_rag_sql = r#"
+        USER: Given the following schema of the database table customer_usage: 
+        dt (date), media_source (string), installs (int), 
+        please write an sql query that will fetch from the customer_usage table the data required to answer the question: how many installs per media source did we have over the last 7 days.
+        please just write the sql query without further explanations or comments
+        SQL QUERY:"#.to_string();
+
+    let prompt_rag_sql2 = r#"
+        Given the following database schema: 
+        customer_usage: dt (date), media_source (string), installs (int)
+
+        answer the following: how many installs per media source did we have over the last 7 days?
+        SQL QUERY: SELECT"#
+        .to_string();
+
+    gen_model.run_test(&prompt_rag_sql2, 200)?;
 
     Ok(())
 }
