@@ -8,9 +8,9 @@ edition = "2021"
 [dependencies]
 accelerate-src = { version = "0.3.2" }
 intel-mkl-src = { version = "0.8.1", features = ["mkl-static-lp64-iomp"] ,optional = true }
-candle = { version = "0.3.1", package = "candle-core" }
-candle-transformers = "0.3.1"
-candle-nn = "0.3.1"
+candle = { version = "0.3.2", package = "candle-core" }
+candle-transformers = "0.3.2"
+candle-nn = "0.3.2"
 anyhow = "1.0.75"
 clap = "4.4.10"
 tokenizers = "0.15.0"

@@ -1,11 +1,14 @@
 use std::fs::File;
 use std::str::FromStr;
+use std::vec;
 
 use models_hf::bert::BertInferenceModel;
 use models_hf::quant_phi::QuantPhiTextGenerator;
 
 fn main() -> anyhow::Result<()> {
+
     println!("Starting testing_app...");
+    
     let key_words = "self driving cars navigation";
     let mut keys_map_file = File::open("keys.bin").unwrap();
     let mut text_map_file = File::open("texts.bin").unwrap();
@@ -55,11 +58,21 @@ fn main() -> anyhow::Result<()> {
         SQL QUERY:"#.to_string();
 
     let prompt_rag_sql2 = r#"
-        Given the following database schema: 
-        customer_usage: dt (date), media_source (string), installs (int)
+        Consider the following reasoning given by one of our customers for why they unsubscribed from the service 
+        and answer the question that follows: 
 
-        answer the following: how many installs per media source did we have over the last 7 days?
-        SQL QUERY: SELECT"#
+        customer response: 'The primary reason for my decision is the price. 
+        While I value the service you provide, it no longer aligns with my current budget. 
+        Additionally, my needs have evolved, and I find myself requiring a different type of service at this time.
+        I appreciate the support and assistance you've offered during my subscription and hope to 
+        possibly return in the future when my circumstances change.'
+
+        What is the churn reason? 
+        1. the cost of the service
+        2. the quality of the service
+        3. they found a better service
+        
+        Answer:"#
         .to_string();
 
     gen_model.run_test(&prompt_rag_sql2, 200)?;

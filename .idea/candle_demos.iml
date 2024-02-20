@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="EMPTY_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/embedding_generator/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/inf_server/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/models_hf/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/test_app_2/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/testing_app/src" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

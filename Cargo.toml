@@ -1,3 +1,9 @@
 [workspace]
 
-members = ["inf_server", "models_hf", "embedding_generator", "testing_app"]
+members = [
+    "inf_server",
+    "models_hf",
+    "embedding_generator",
+    "testing_app",
+    "test_app_2",
+]

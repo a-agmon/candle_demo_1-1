@@ -26,6 +26,24 @@ struct TextGeneration {
     verbose_prompt: bool,
 }
 
+// implemnt clone for this
+impl Clone for TextGeneration {
+    fn clone(&self) -> Self {
+        let seed = 299792458;
+        let temp = Some(0.);
+        let top_p = None;
+        Self {
+            model: self.model.clone(),
+            device: self.device.clone(),
+            tokenizer: self.tokenizer.clone(),
+            logits_processor: LogitsProcessor::new(seed, temp, top_p),
+            repeat_penalty: self.repeat_penalty,
+            repeat_last_n: self.repeat_last_n,
+            verbose_prompt: self.verbose_prompt,
+        }
+    }
+}
+
 impl TextGeneration {
     #[allow(clippy::too_many_arguments)]
     fn new(
@@ -115,6 +133,7 @@ impl TextGeneration {
     }
 }
 
+#[derive(Clone)]
 pub struct QuantPhiTextGenerator {
     text_generator: TextGeneration,
 }

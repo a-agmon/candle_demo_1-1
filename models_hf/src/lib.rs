@@ -1,6 +1,7 @@
 pub mod bert;
 pub mod quant_phi;
 pub mod open_chat;
+pub mod token_output_stream;
 
 pub fn add(left: usize, right: usize) -> usize {
     left + right
